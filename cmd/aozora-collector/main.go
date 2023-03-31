@@ -7,18 +7,17 @@ import (
 
 type Entry struct {
 	AuthorID string
-	Author string
-	TitleID string
-	Title string
-	InfoURL string
-	ZipURL string
+	Author   string
+	TitleID  string
+	Title    string
+	InfoURL  string
+	ZipURL   string
 }
 
 func findEntries(siteURL string) ([]Entry, error) {
 	// 処理
 	return []Entry{}, nil
 }
-
 
 func main() {
 	listURL := "https://www.aozora.gr.jp/index_pages/person879.html"
