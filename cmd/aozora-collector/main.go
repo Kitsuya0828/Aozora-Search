@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"net/http"
 
 	"github.com/PuerkitoBio/goquery"
 )
@@ -16,8 +17,8 @@ type Entry struct {
 	ZipURL   string
 }
 
-func findEntries(siteURL string) ([]Entry, error) {
-	doc, err := goquery.NewDocument(siteURL)
+func findEntries(res *http.Response) ([]Entry, error) {
+	doc, err := goquery.NewDocumentFromReader(res.Body)
 	if err != nil {
 		return nil, err
 	}
@@ -30,7 +31,12 @@ func findEntries(siteURL string) ([]Entry, error) {
 func main() {
 	listURL := "https://www.aozora.gr.jp/index_pages/person879.html"
 
-	entries, err := findEntries(listURL)
+	res, err := http.Get(listURL)
+	if err != nil {
+		panic(err)
+	}
+
+	entries, err := findEntries(res)
 	if err != nil {
 		log.Fatal(err)
 	}
