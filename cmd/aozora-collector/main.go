@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/url"
+	"path"
 	"regexp"
 	"strings"
 
@@ -39,7 +41,20 @@ func findAuthorAndZIP(siteURL string) (string, string) {
 			zipURL = href
 		}
 	})
-	return author, zipURL
+
+	if zipURL == "" {
+		return author, ""
+	}
+	if strings.HasPrefix(zipURL, "http://") || strings.HasPrefix(zipURL, "https://") {
+		return author, zipURL
+	}
+
+	u, err := url.Parse(siteURL)
+	if err != nil {
+		return author, ""
+	}
+	u.Path = path.Join(path.Dir(u.Path), zipURL)
+	return author, u.String()
 }
 
 func findEntries(siteURL string) ([]Entry, error) {
@@ -52,17 +67,28 @@ func findEntries(siteURL string) ([]Entry, error) {
 	if err != nil {
 		return nil, err
 	}
+	entries := []Entry{}
 	pat := regexp.MustCompile(`.*/cards/([0-9]+)/card([0-9]+).html$`)
 	doc.Find("ol li a").Each(func(i int, s *goquery.Selection) {
 		token := pat.FindStringSubmatch(s.AttrOr("href", ""))
 		if len(token) != 3 {
 			return
 		}
+		title := s.Text()
 		pageURL := fmt.Sprintf("https://www.aozora.gr.jp/cards/%s/card%s.html", token[1], token[2])
 		author, zipURL := findAuthorAndZIP(pageURL)
-		println(author, zipURL)
+		if zipURL != "" {
+			entries = append(entries, Entry{
+				AuthorID: token[1],
+				Author: author,
+				TitleID: token[2],
+				Title: title,
+				InfoURL: siteURL,
+				ZipURL: zipURL,
+			})
+		}
 	})
-	return nil, nil
+	return entries, nil
 }
 
 func main() {
