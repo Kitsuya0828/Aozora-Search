@@ -136,7 +136,7 @@ Sub-commands:
 
 func main() {
 	var dsn string
-	flag.StringVar(&dsn, "d", "database.sqlite", "database")
+	flag.StringVar(&dsn, "d", "../aozora-collector/database.sqlite", "database")
 	flag.Usage = func() {
 		fmt.Print(usage)
 	}
@@ -162,7 +162,7 @@ func main() {
 			os.Exit(2)
 		}
 		err = showTitles(db, flag.Arg(1))
-	case "connect":
+	case "content":
 		if flag.NArg() != 3 {
 			flag.Usage()
 			os.Exit(2)
